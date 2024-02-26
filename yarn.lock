@@ -3350,6 +3350,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@calcom/demodesk@workspace:packages/app-store/demodesk":
+  version: 0.0.0-use.local
+  resolution: "@calcom/demodesk@workspace:packages/app-store/demodesk"
+  dependencies:
+    "@calcom/lib": "*"
+    "@calcom/types": "*"
+  languageName: unknown
+  linkType: soft
+
 "@calcom/discord@workspace:packages/app-store/discord":
   version: 0.0.0-use.local
   resolution: "@calcom/discord@workspace:packages/app-store/discord"
@@ -24749,15 +24758,6 @@ __metadata:
   peerDependencies:
     react: ^16.5.1 || ^17.0.0 || ^18.0.0
   checksum: 768ffe368c52a518ee339203d86ff4479989ab4d79c0716f721900c4bb7392ef6ff7a14807f6a685abd74d27f4c1778170bff77a0ab4c3e06c17944b557d8300
-  languageName: node
-  linkType: hard
-
-"lucide-react@npm:^0.334.0":
-  version: 0.334.0
-  resolution: "lucide-react@npm:0.334.0"
-  peerDependencies:
-    react: ^16.5.1 || ^17.0.0 || ^18.0.0
-  checksum: b355bcc8d5be80603ce27a5e72376dca47f59d56ed14db17c8e4970ec4bf17b965ed1810134ce6b3d404b37e0ea476034efb91749efe1a249af0b63013aa2d1f
   languageName: node
   linkType: hard
 
