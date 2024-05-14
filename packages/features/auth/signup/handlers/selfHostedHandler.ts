@@ -92,6 +92,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       }
 
+      const isEOAddress = userEmail.endsWith("@erikolsson.se");
+      const avatarUrl = isEOAddress ? `https://imagecdn.erikolsson.se/O365/${userEmail}/hemsida/r0x250/c50,0,192x192` : null;
+
       const user = await prisma.user.upsert({
         where: { email: userEmail },
         update: {
@@ -110,6 +113,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           email: userEmail,
           password: { create: { hash: hashedPassword } },
           identityProvider: IdentityProvider.CAL,
+          bio: "Hej! Här kan du boka in en mötestid direkt i min kalender.",
+          weekStart: "Monday",
+          hideBranding: true,
+          locale: "sv",
+          timeFormat: "24",
+          avatarUrl,
         },
       });
 
