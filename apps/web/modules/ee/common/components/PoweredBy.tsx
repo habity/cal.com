@@ -21,7 +21,7 @@ const PoweredByCal = ({
         {APP_NAME === "Cal.com" || !hasValidLicense ? (
           <>
             <img
-              className="-mt-px inline h-[16px] w-auto dark:invert"
+              className="-mt-px inline h-auto w-[120px] dark:invert"
               src={`${process.env.NEXT_PUBLIC_WEBAPP_URL}/api/logo`}
               alt="Cal.com Logo"
             />
