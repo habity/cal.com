@@ -16,7 +16,11 @@ import { useTypedQuery } from "@calcom/lib/hooks/useTypedQuery";
 import { HttpError } from "@calcom/lib/http-error";
 import { parseEventTypeColor } from "@calcom/lib/isEventTypeColor";
 import { localStorage } from "@calcom/lib/webstorage";
-import { MembershipRole, SchedulingType } from "@calcom/prisma/enums";
+import {
+  MembershipRole,
+  SchedulingType,
+  UserPermissionRole,
+} from "@calcom/prisma/enums";
 import type { RouterOutputs } from "@calcom/trpc/react";
 import { trpc } from "@calcom/trpc/react";
 import classNames from "@calcom/ui/classNames";
@@ -56,6 +60,7 @@ import { DuplicateDialog } from "@calcom/web/modules/event-types/components/Dupl
 import { InfiniteSkeletonLoader } from "@calcom/web/modules/event-types/components/SkeletonLoader";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { TRPCClientError } from "@trpc/client";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
@@ -315,6 +320,8 @@ export const InfiniteEventTypeList = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { copyToClipboard } = useCopy();
+  const session = useSession();
+  const isAdmin = session.data?.user.role === UserPermissionRole.ADMIN;
   const [parent] = useAutoAnimate<HTMLUListElement>();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteDialogTypeId, setDeleteDialogTypeId] = useState(0);
@@ -819,27 +826,30 @@ export const InfiniteEventTypeList = ({
                                   </DropdownMenuItem>
                                 )}
                                 {/* readonly is only set when we are on a team - if we are on a user event type null will be the value. */}
-                                {!readOnly && !isChildrenManagedEventType && (
-                                  <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem>
-                                      <DropdownItem
-                                        color="destructive"
-                                        onClick={() => {
-                                          setDeleteDialogOpen(true);
-                                          setDeleteDialogTypeId(type.id);
-                                          setDeleteDialogSchedulingType(
-                                            type.schedulingType
-                                          );
-                                        }}
-                                        StartIcon="trash"
-                                        className="w-full rounded-t-none"
-                                      >
-                                        {t("delete")}
-                                      </DropdownItem>
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
+                                {/* Only admins can delete event types */}
+                                {!readOnly &&
+                                  !isChildrenManagedEventType &&
+                                  isAdmin && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem>
+                                        <DropdownItem
+                                          color="destructive"
+                                          onClick={() => {
+                                            setDeleteDialogOpen(true);
+                                            setDeleteDialogTypeId(type.id);
+                                            setDeleteDialogSchedulingType(
+                                              type.schedulingType
+                                            );
+                                          }}
+                                          StartIcon="trash"
+                                          className="w-full rounded-t-none"
+                                        >
+                                          {t("delete")}
+                                        </DropdownItem>
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
                               </DropdownMenuContent>
                             </Dropdown>
                           </ButtonGroup>
@@ -945,26 +955,29 @@ export const InfiniteEventTypeList = ({
                               </DropdownMenuItem>
                             )}
                           {/* readonly is only set when we are on a team - if we are on a user event type null will be the value. */}
-                          {!readOnly && !isChildrenManagedEventType && (
-                            <>
-                              <DropdownMenuItem className="outline-none">
-                                <DropdownItem
-                                  color="destructive"
-                                  onClick={() => {
-                                    setDeleteDialogOpen(true);
-                                    setDeleteDialogTypeId(type.id);
-                                    setDeleteDialogSchedulingType(
-                                      type.schedulingType
-                                    );
-                                  }}
-                                  StartIcon="trash"
-                                  className="w-full rounded-t-none"
-                                >
-                                  {t("delete")}
-                                </DropdownItem>
-                              </DropdownMenuItem>
-                            </>
-                          )}
+                          {/* Only admins can delete event types */}
+                          {!readOnly &&
+                            !isChildrenManagedEventType &&
+                            isAdmin && (
+                              <>
+                                <DropdownMenuItem className="outline-none">
+                                  <DropdownItem
+                                    color="destructive"
+                                    onClick={() => {
+                                      setDeleteDialogOpen(true);
+                                      setDeleteDialogTypeId(type.id);
+                                      setDeleteDialogSchedulingType(
+                                        type.schedulingType
+                                      );
+                                    }}
+                                    StartIcon="trash"
+                                    className="w-full rounded-t-none"
+                                  >
+                                    {t("delete")}
+                                  </DropdownItem>
+                                </DropdownMenuItem>
+                              </>
+                            )}
                           <DropdownMenuSeparator />
                           {!isManagedEventType && (
                             <div className="hover:bg-subtle flex h-9 cursor-pointer flex-row items-center justify-between rounded-b-lg px-4 py-2 transition">
