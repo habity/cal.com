@@ -2,7 +2,10 @@ import { useMemo, useState, Suspense } from "react";
 import type { UseFormReturn } from "react-hook-form";
 
 import useLockedFieldsManager from "@calcom/features/ee/managed-event-types/hooks/useLockedFieldsManager";
-import { EventTypeEmbedButton, EventTypeEmbedDialog } from "@calcom/web/modules/embed/components/EventTypeEmbed";
+import {
+  EventTypeEmbedButton,
+  EventTypeEmbedDialog,
+} from "@calcom/web/modules/embed/components/EventTypeEmbed";
 import type { FormValues } from "@calcom/features/eventtypes/lib/types";
 import type { EventTypeSetupProps } from "@calcom/features/eventtypes/lib/types";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
@@ -69,7 +72,8 @@ function EventTypeSingleLayout({
   saveButtonRef,
 }: Props) {
   const { t } = useLocale();
-  const eventTypesLockedByOrg = eventType.team?.parent?.organizationSettings?.lockEventTypeCreationForUsers;
+  const eventTypesLockedByOrg =
+    eventType.team?.parent?.organizationSettings?.lockEventTypeCreationForUsers;
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -79,18 +83,26 @@ function EventTypeSingleLayout({
     formMethods.getValues("schedulingType") === SchedulingType.MANAGED ||
     isUserOrganizationAdmin;
 
-  const { isManagedEventType, isChildrenManagedEventType } = useLockedFieldsManager({
-    eventType,
-    translate: t,
-    formMethods,
-  });
+  const { isManagedEventType, isChildrenManagedEventType } =
+    useLockedFieldsManager({
+      eventType,
+      translate: t,
+      formMethods,
+    });
   const EventTypeTabs = tabsNavigation;
-  const permalink = `${bookerUrl}/${team ? `${!team.parentId ? "team/" : ""}${team.slug}` : formMethods.getValues("users")[0].username
-    }/${eventType.slug}`;
+  const permalink = `${bookerUrl}/${
+    team
+      ? `${!team.parentId ? "team/" : ""}${team.slug}`
+      : formMethods.getValues("users")[0].username
+  }/${eventType.slug}`;
 
-  const embedLink = `${team ? `team/${team.slug}` : formMethods.getValues("users")[0].username
-    }/${formMethods.getValues("slug")}`;
-  const isManagedEvent = formMethods.getValues("schedulingType") === SchedulingType.MANAGED ? "_managed" : "";
+  const embedLink = `${
+    team ? `team/${team.slug}` : formMethods.getValues("users")[0].username
+  }/${formMethods.getValues("slug")}`;
+  const isManagedEvent =
+    formMethods.getValues("schedulingType") === SchedulingType.MANAGED
+      ? "_managed"
+      : "";
 
   const [Shell] = useMemo(() => {
     return isPlatform ? [PlatformShell] : [WebShell];
@@ -120,28 +132,35 @@ function EventTypeSingleLayout({
                   "sm:hover:bg-cal-muted hidden cursor-pointer items-center rounded-md transition",
                   formMethods.watch("hidden") ? "pl-2" : "",
                   "lg:flex"
-                )}>
+                )}
+              >
                 {formMethods.watch("hidden") && (
                   <Skeleton
                     as={Label}
                     htmlFor="hiddenSwitch"
-                    className="mt-2 hidden cursor-pointer self-center whitespace-nowrap pr-2 sm:inline">
+                    className="mt-2 hidden cursor-pointer self-center whitespace-nowrap pr-2 sm:inline"
+                  >
                     {t("hidden")}
                   </Skeleton>
                 )}
                 <Tooltip
                   sideOffset={4}
                   content={
-                    formMethods.watch("hidden") ? t("show_eventtype_on_profile") : t("hide_from_profile")
+                    formMethods.watch("hidden")
+                      ? t("show_eventtype_on_profile")
+                      : t("hide_from_profile")
                   }
-                  side="bottom">
+                  side="bottom"
+                >
                   <div className="self-center rounded-md p-2">
                     <Switch
                       id="hiddenSwitch"
                       disabled={eventTypesLockedByOrg}
                       checked={!formMethods.watch("hidden")}
                       onCheckedChange={(e) => {
-                        formMethods.setValue("hidden", !e, { shouldDirty: true });
+                        formMethods.setValue("hidden", !e, {
+                          shouldDirty: true,
+                        });
                       }}
                     />
                   </div>
@@ -152,7 +171,10 @@ function EventTypeSingleLayout({
           )}
 
           {/* TODO: Figure out why combined isnt working - works in storybook */}
-          <ButtonGroup combined containerProps={{ className: "border-default hidden lg:flex" }}>
+          <ButtonGroup
+            combined
+            containerProps={{ className: "border-default hidden lg:flex" }}
+          >
             {!isManagedEventType && (
               <>
                 {/* We have to warp this in tooltip as it has a href which disables the tooltip on buttons */}
@@ -213,11 +235,18 @@ function EventTypeSingleLayout({
             )}
           </ButtonGroup>
 
-          {(!isPlatform || (isPlatform && allowDelete)) && <VerticalDivider className="hidden lg:block" />}
+          {(!isPlatform || (isPlatform && allowDelete)) && (
+            <VerticalDivider className="hidden lg:block" />
+          )}
 
           <Dropdown>
             <DropdownMenuTrigger asChild>
-              <Button className="lg:hidden" StartIcon="ellipsis" variant="icon" color="secondary" />
+              <Button
+                className="lg:hidden"
+                StartIcon="ellipsis"
+                variant="icon"
+                color="secondary"
+              />
             </DropdownMenuTrigger>
             <DropdownMenuContent style={{ minWidth: "200px" }}>
               <DropdownMenuItem className="focus:ring-muted">
@@ -226,7 +255,8 @@ function EventTypeSingleLayout({
                   type="button"
                   StartIcon="external-link"
                   href={permalink}
-                  rel="noreferrer">
+                  rel="noreferrer"
+                >
                   {t("preview")}
                 </DropdownItem>
               </DropdownMenuItem>
@@ -237,7 +267,8 @@ function EventTypeSingleLayout({
                   onClick={() => {
                     navigator.clipboard.writeText(permalink);
                     showToast("Link copied!", "success");
-                  }}>
+                  }}
+                >
                   {t("copy_link")}
                 </DropdownItem>
               </DropdownMenuItem>
@@ -248,7 +279,8 @@ function EventTypeSingleLayout({
                     color="destructive"
                     StartIcon="trash"
                     disabled={!hasPermsToDelete}
-                    onClick={() => setDeleteDialogOpen(true)}>
+                    onClick={() => setDeleteDialogOpen(true)}
+                  >
                     {t("delete")}
                   </DropdownItem>
                 </DropdownMenuItem>
@@ -258,8 +290,11 @@ function EventTypeSingleLayout({
                 <Skeleton
                   as={Label}
                   htmlFor="hiddenSwitch"
-                  className="mt-2 inline cursor-pointer self-center pr-2 ">
-                  {formMethods.watch("hidden") ? t("show_eventtype_on_profile") : t("hide_from_profile")}
+                  className="mt-2 inline cursor-pointer self-center pr-2 "
+                >
+                  {formMethods.watch("hidden")
+                    ? t("show_eventtype_on_profile")
+                    : t("hide_from_profile")}
                 </Skeleton>
                 <Switch
                   id="hiddenSwitch"
@@ -279,17 +314,20 @@ function EventTypeSingleLayout({
             loading={isUpdateMutationLoading}
             disabled={!formMethods.formState.isDirty}
             data-testid="update-eventtype"
-            form="event-type-form">
+            form="event-type-form"
+          >
             {t("save")}
           </Button>
         </div>
-      }>
+      }
+    >
       <Suspense
         fallback={
           <div className="flex h-64 items-center justify-center">
             <Icon name="loader" className="h-5 w-5 animate-spin" />
           </div>
-        }>
+        }
+      >
         <div className="flex flex-col xl:flex-row xl:space-x-6">
           <div className="hidden xl:block">
             <VerticalTabs
@@ -308,7 +346,8 @@ function EventTypeSingleLayout({
               className={classNames(
                 "bg-default border-subtle  mt-4 rounded-md sm:mx-0 xl:mt-0",
                 disableBorder ? "border-0 " : "p-2 md:border md:p-6"
-              )}>
+              )}
+            >
               {children}
             </div>
           </div>

@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import type { UseFormGetValues, UseFormSetValue, Control, FormState } from "react-hook-form";
+import type {
+  UseFormGetValues,
+  UseFormSetValue,
+  Control,
+  FormState,
+} from "react-hook-form";
 import type { MultiValue } from "react-select";
 
 import { useIsPlatform } from "@calcom/atoms/hooks/useIsPlatform";
@@ -12,8 +17,14 @@ import type {
   SelectClassNames,
   SettingsToggleClassNames,
 } from "@calcom/features/eventtypes/lib/types";
-import type { FormValues, LocationFormValues } from "@calcom/features/eventtypes/lib/types";
-import { MAX_EVENT_DURATION_MINUTES, MIN_EVENT_DURATION_MINUTES } from "@calcom/lib/constants";
+import type {
+  FormValues,
+  LocationFormValues,
+} from "@calcom/features/eventtypes/lib/types";
+import {
+  MAX_EVENT_DURATION_MINUTES,
+  MIN_EVENT_DURATION_MINUTES,
+} from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { md } from "@calcom/lib/markdownIt";
 import { slugify } from "@calcom/lib/slugify";
@@ -55,7 +66,11 @@ export type EventSetupTabCustomClassNames = {
 
 export type EventSetupTabProps = Pick<
   EventTypeSetupProps,
-  "eventType" | "locationOptions" | "team" | "teamMembers" | "destinationCalendar"
+  | "eventType"
+  | "locationOptions"
+  | "team"
+  | "teamMembers"
+  | "destinationCalendar"
 > & {
   customClassNames?: EventSetupTabCustomClassNames;
 };
@@ -65,12 +80,21 @@ export const EventSetupTab = (
     hasOrgBranding: boolean;
     orgId?: number;
     localeOptions?: { value: string; label: string }[];
+    isAdmin?: boolean;
   }
 ) => {
   const { t } = useLocale();
   const isPlatform = useIsPlatform();
   const formMethods = useFormContext<FormValues>();
-  const { eventType, team, urlPrefix, hasOrgBranding, customClassNames, orgId } = props;
+  const {
+    eventType,
+    team,
+    urlPrefix,
+    hasOrgBranding,
+    customClassNames,
+    orgId,
+    isAdmin,
+  } = props;
 
   const [multipleDuration, setMultipleDuration] = useState(
     formMethods.getValues("metadata")?.multipleDuration
@@ -80,7 +104,8 @@ export const EventSetupTab = (
   const seatsEnabled = formMethods.watch("seatsPerTimeSlotEnabled");
 
   const multipleDurationOptions = [
-    5, 10, 15, 20, 25, 30, 45, 50, 60, 75, 80, 90, 120, 150, 180, 240, 300, 360, 420, 480,
+    5, 10, 15, 20, 25, 30, 45, 50, 60, 75, 80, 90, 120, 150, 180, 240, 300, 360,
+    420, 480,
   ].map((mins) => ({
     value: mins,
     label: t("multiple_duration_mins", { count: mins }),
@@ -91,18 +116,31 @@ export const EventSetupTab = (
       value: number;
       label: string;
     }>
-  >(multipleDurationOptions.filter((mdOpt) => multipleDuration?.includes(mdOpt.value)));
+  >(
+    multipleDurationOptions.filter((mdOpt) =>
+      multipleDuration?.includes(mdOpt.value)
+    )
+  );
   const [defaultDuration, setDefaultDuration] = useState(
-    selectedMultipleDuration.find((opt) => opt.value === formMethods.getValues("length")) ?? null
+    selectedMultipleDuration.find(
+      (opt) => opt.value === formMethods.getValues("length")
+    ) ?? null
   );
 
-  const { isChildrenManagedEventType, isManagedEventType, shouldLockIndicator, shouldLockDisableProps } =
-    useLockedFieldsManager({ eventType, translate: t, formMethods });
+  const {
+    isChildrenManagedEventType,
+    isManagedEventType,
+    shouldLockIndicator,
+    shouldLockDisableProps,
+  } = useLockedFieldsManager({ eventType, translate: t, formMethods });
 
   const lengthLockedProps = shouldLockDisableProps("length");
   const descriptionLockedProps = shouldLockDisableProps("description");
   const urlLockedProps = shouldLockDisableProps("slug");
   const titleLockedProps = shouldLockDisableProps("title");
+
+  // Non-admins cannot edit title, description, or URL
+  const isFieldsLockedForNonAdmin = !isAdmin;
 
   return (
     <div>
@@ -111,14 +149,24 @@ export const EventSetupTab = (
           className={classNames(
             "border-subtle stack-y-6 rounded-lg border p-6",
             customClassNames?.titleSection?.container
-          )}>
+          )}
+        >
           <TextField
             required
-            containerClassName={classNames(customClassNames?.titleSection?.titleInput?.container)}
-            labelClassName={classNames(customClassNames?.titleSection?.titleInput?.label)}
-            className={classNames(customClassNames?.titleSection?.titleInput?.input)}
+            containerClassName={classNames(
+              customClassNames?.titleSection?.titleInput?.container
+            )}
+            labelClassName={classNames(
+              customClassNames?.titleSection?.titleInput?.label
+            )}
+            className={classNames(
+              customClassNames?.titleSection?.titleInput?.input
+            )}
             label={t("title")}
-            {...(isManagedEventType || isChildrenManagedEventType ? titleLockedProps : {})}
+            {...(isManagedEventType || isChildrenManagedEventType
+              ? titleLockedProps
+              : {})}
+            disabled={isFieldsLockedForNonAdmin}
             defaultValue={eventType.title}
             data-testid="event-title"
             {...formMethods.register("title")}
@@ -127,28 +175,41 @@ export const EventSetupTab = (
             {isPlatform ? (
               <TextAreaField
                 {...formMethods.register("description", {
-                  disabled: descriptionLockedProps.disabled,
+                  disabled:
+                    descriptionLockedProps.disabled ||
+                    isFieldsLockedForNonAdmin,
                 })}
                 placeholder={t("quick_video_meeting")}
-                className={customClassNames?.titleSection?.descriptionInput?.input}
+                className={
+                  customClassNames?.titleSection?.descriptionInput?.input
+                }
                 labelProps={{
-                  className: customClassNames?.titleSection?.descriptionInput?.label,
+                  className:
+                    customClassNames?.titleSection?.descriptionInput?.label,
                 }}
               />
             ) : (
               <>
                 <Label htmlFor="editor">
                   {t("description")}
-                  {(isManagedEventType || isChildrenManagedEventType) && shouldLockIndicator("description")}
+                  {(isManagedEventType || isChildrenManagedEventType) &&
+                    shouldLockIndicator("description")}
                 </Label>
                 <Editor
-                  getText={() => md.render(formMethods.getValues("description") || "")}
+                  getText={() =>
+                    md.render(formMethods.getValues("description") || "")
+                  }
                   setText={(value: string) =>
-                    formMethods.setValue("description", turndown(value), { shouldDirty: true })
+                    formMethods.setValue("description", turndown(value), {
+                      shouldDirty: true,
+                    })
                   }
                   excludedToolbarItems={["blockType"]}
                   placeholder={t("quick_video_meeting")}
-                  editable={!descriptionLockedProps.disabled}
+                  editable={
+                    !descriptionLockedProps.disabled &&
+                    !isFieldsLockedForNonAdmin
+                  }
                   firstRender={firstRender}
                   setFirstRender={setFirstRender}
                 />
@@ -158,15 +219,23 @@ export const EventSetupTab = (
           <TextField
             required
             label={isPlatform ? "Slug" : t("URL")}
-            {...(isManagedEventType || isChildrenManagedEventType ? urlLockedProps : {})}
+            {...(isManagedEventType || isChildrenManagedEventType
+              ? urlLockedProps
+              : {})}
+            disabled={isFieldsLockedForNonAdmin}
             defaultValue={eventType.slug}
             data-testid="event-slug"
             containerClassName={classNames(
               "[&>div]:gap-0",
               customClassNames?.titleSection?.urlInput?.container
             )}
-            labelClassName={classNames(customClassNames?.titleSection?.urlInput?.label)}
-            className={classNames("pl-0", customClassNames?.titleSection?.urlInput?.input)}
+            labelClassName={classNames(
+              customClassNames?.titleSection?.urlInput?.label
+            )}
+            className={classNames(
+              "pl-0",
+              customClassNames?.titleSection?.urlInput?.input
+            )}
             addOnLeading={
               isPlatform ? undefined : (
                 <span className="max-w-24 md:max-w-56 inline-block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
@@ -189,20 +258,25 @@ export const EventSetupTab = (
           className={classNames(
             "border-subtle rounded-lg border p-6",
             customClassNames?.durationSection?.container
-          )}>
+          )}
+        >
           {multipleDuration ? (
             <div
               className={classNames(
                 "stack-y-6",
-                customClassNames?.durationSection?.multipleDuration?.availableDurationsSelect?.container
-              )}>
+                customClassNames?.durationSection?.multipleDuration
+                  ?.availableDurationsSelect?.container
+              )}
+            >
               <div>
                 <Skeleton
                   as={Label}
                   loadingClassName="w-16"
                   className={
-                    customClassNames?.durationSection?.multipleDuration?.availableDurationsSelect?.label
-                  }>
+                    customClassNames?.durationSection?.multipleDuration
+                      ?.availableDurationsSelect?.label
+                  }
+                >
                   {t("available_durations")}
                 </Skeleton>
                 <Select
@@ -213,11 +287,12 @@ export const EventSetupTab = (
                   isDisabled={lengthLockedProps.disabled}
                   className={classNames(
                     "min-h-[36px]! h-auto text-sm",
-                    customClassNames?.durationSection?.multipleDuration?.availableDurationsSelect?.select
+                    customClassNames?.durationSection?.multipleDuration
+                      ?.availableDurationsSelect?.select
                   )}
                   innerClassNames={
-                    customClassNames?.durationSection?.multipleDuration?.availableDurationsSelect
-                      ?.innerClassNames
+                    customClassNames?.durationSection?.multipleDuration
+                      ?.availableDurationsSelect?.innerClassNames
                   }
                   options={multipleDurationOptions}
                   value={selectedMultipleDuration}
@@ -229,32 +304,46 @@ export const EventSetupTab = (
                     const values = newOptions.map((opt) => opt.value);
                     setMultipleDuration(values);
                     setSelectedMultipleDuration(newOptions);
-                    if (!newOptions.find((opt) => opt.value === defaultDuration?.value)) {
+                    if (
+                      !newOptions.find(
+                        (opt) => opt.value === defaultDuration?.value
+                      )
+                    ) {
                       if (newOptions.length > 0) {
                         setDefaultDuration(newOptions[0]);
-                        formMethods.setValue("length", newOptions[0].value, { shouldDirty: true });
+                        formMethods.setValue("length", newOptions[0].value, {
+                          shouldDirty: true,
+                        });
                       } else {
                         setDefaultDuration(null);
                       }
                     }
                     if (newOptions.length === 1 && defaultDuration === null) {
                       setDefaultDuration(newOptions[0]);
-                      formMethods.setValue("length", newOptions[0].value, { shouldDirty: true });
+                      formMethods.setValue("length", newOptions[0].value, {
+                        shouldDirty: true,
+                      });
                     }
-                    formMethods.setValue("metadata.multipleDuration", values, { shouldDirty: true });
+                    formMethods.setValue("metadata.multipleDuration", values, {
+                      shouldDirty: true,
+                    });
                   }}
                 />
               </div>
               <div
                 className={
-                  customClassNames?.durationSection?.multipleDuration?.defaultDurationSelect?.container
-                }>
+                  customClassNames?.durationSection?.multipleDuration
+                    ?.defaultDurationSelect?.container
+                }
+              >
                 <Skeleton
                   as={Label}
                   loadingClassName="w-16"
                   className={
-                    customClassNames?.durationSection?.multipleDuration?.defaultDurationSelect?.label
-                  }>
+                    customClassNames?.durationSection?.multipleDuration
+                      ?.defaultDurationSelect?.label
+                  }
+                >
                   {t("default_duration")}
                   {shouldLockIndicator("length")}
                 </Skeleton>
@@ -264,20 +353,26 @@ export const EventSetupTab = (
                   name="length"
                   className={classNames(
                     "text-sm",
-                    customClassNames?.durationSection?.multipleDuration?.defaultDurationSelect?.select
+                    customClassNames?.durationSection?.multipleDuration
+                      ?.defaultDurationSelect?.select
                   )}
                   innerClassNames={
-                    customClassNames?.durationSection?.multipleDuration?.defaultDurationSelect
-                      ?.innerClassNames
+                    customClassNames?.durationSection?.multipleDuration
+                      ?.defaultDurationSelect?.innerClassNames
                   }
                   isDisabled={lengthLockedProps.disabled}
                   noOptionsMessage={() => t("default_duration_no_options")}
                   options={selectedMultipleDuration}
                   onChange={(option) => {
                     setDefaultDuration(
-                      selectedMultipleDuration.find((opt) => opt.value === option?.value) ?? null
+                      selectedMultipleDuration.find(
+                        (opt) => opt.value === option?.value
+                      ) ?? null
                     );
-                    if (option) formMethods.setValue("length", option.value, { shouldDirty: true });
+                    if (option)
+                      formMethods.setValue("length", option.value, {
+                        shouldDirty: true,
+                      });
                   }}
                 />
               </div>
@@ -287,23 +382,34 @@ export const EventSetupTab = (
               required
               type="number"
               containerClassName={classNames(
-                customClassNames?.durationSection?.singleDurationInput?.container
+                customClassNames?.durationSection?.singleDurationInput
+                  ?.container
               )}
-              labelClassName={classNames(customClassNames?.durationSection?.singleDurationInput?.label)}
-              className={classNames(customClassNames?.durationSection?.singleDurationInput?.input)}
+              labelClassName={classNames(
+                customClassNames?.durationSection?.singleDurationInput?.label
+              )}
+              className={classNames(
+                customClassNames?.durationSection?.singleDurationInput?.input
+              )}
               data-testid="duration"
-              {...(isManagedEventType || isChildrenManagedEventType ? lengthLockedProps : {})}
+              {...(isManagedEventType || isChildrenManagedEventType
+                ? lengthLockedProps
+                : {})}
               label={t("duration")}
               defaultValue={formMethods.getValues("length") ?? 15}
               {...formMethods.register("length", {
                 valueAsNumber: true,
                 min: {
                   value: MIN_EVENT_DURATION_MINUTES,
-                  message: t("duration_min_error", { min: MIN_EVENT_DURATION_MINUTES }),
+                  message: t("duration_min_error", {
+                    min: MIN_EVENT_DURATION_MINUTES,
+                  }),
                 },
                 max: {
                   value: MAX_EVENT_DURATION_MINUTES,
-                  message: t("duration_max_error", { max: MAX_EVENT_DURATION_MINUTES }),
+                  message: t("duration_max_error", {
+                    max: MAX_EVENT_DURATION_MINUTES,
+                  }),
                 },
               })}
               addOnSuffix={<>{t("minutes")}</>}
@@ -317,21 +423,44 @@ export const EventSetupTab = (
                 title={t("allow_multiple_durations")}
                 checked={multipleDuration !== undefined}
                 disabled={seatsEnabled}
-                tooltip={seatsEnabled ? t("seat_options_doesnt_multiple_durations") : undefined}
-                labelClassName={customClassNames?.durationSection?.selectDurationToggle?.label}
-                descriptionClassName={customClassNames?.durationSection?.selectDurationToggle?.description}
-                switchContainerClassName={customClassNames?.durationSection?.selectDurationToggle?.container}
-                childrenClassName={customClassNames?.durationSection?.selectDurationToggle?.children}
+                tooltip={
+                  seatsEnabled
+                    ? t("seat_options_doesnt_multiple_durations")
+                    : undefined
+                }
+                labelClassName={
+                  customClassNames?.durationSection?.selectDurationToggle?.label
+                }
+                descriptionClassName={
+                  customClassNames?.durationSection?.selectDurationToggle
+                    ?.description
+                }
+                switchContainerClassName={
+                  customClassNames?.durationSection?.selectDurationToggle
+                    ?.container
+                }
+                childrenClassName={
+                  customClassNames?.durationSection?.selectDurationToggle
+                    ?.children
+                }
                 onCheckedChange={() => {
                   if (multipleDuration !== undefined) {
                     setMultipleDuration(undefined);
                     setSelectedMultipleDuration([]);
                     setDefaultDuration(null);
-                    formMethods.setValue("metadata.multipleDuration", undefined, { shouldDirty: true });
-                    formMethods.setValue("length", eventType.length, { shouldDirty: true });
+                    formMethods.setValue(
+                      "metadata.multipleDuration",
+                      undefined,
+                      { shouldDirty: true }
+                    );
+                    formMethods.setValue("length", eventType.length, {
+                      shouldDirty: true,
+                    });
                   } else {
                     setMultipleDuration([]);
-                    formMethods.setValue("metadata.multipleDuration", [], { shouldDirty: true });
+                    formMethods.setValue("metadata.multipleDuration", [], {
+                      shouldDirty: true,
+                    });
                     formMethods.setValue("length", 0, { shouldDirty: true });
                   }
                 }}
@@ -343,13 +472,15 @@ export const EventSetupTab = (
           className={classNames(
             "border-subtle rounded-lg border p-6",
             customClassNames?.locationSection?.container
-          )}>
+          )}
+        >
           <div>
             <Skeleton
               as={Label}
               loadingClassName="w-16"
               htmlFor="locations"
-              className={customClassNames?.locationSection?.label}>
+              className={customClassNames?.locationSection?.label}
+            >
               {t("location")}
               {/*improve shouldLockIndicator function to also accept eventType and then conditionally render
               based on Managed Event type or not.*/}
@@ -364,11 +495,21 @@ export const EventSetupTab = (
                   showAppStoreLink={true}
                   isChildrenManagedEventType={isChildrenManagedEventType}
                   isManagedEventType={isManagedEventType}
-                  disableLocationProp={shouldLockDisableProps("locations").disabled}
-                  getValues={formMethods.getValues as unknown as UseFormGetValues<LocationFormValues>}
-                  setValue={formMethods.setValue as unknown as UseFormSetValue<LocationFormValues>}
-                  control={formMethods.control as unknown as Control<LocationFormValues>}
-                  formState={formMethods.formState as unknown as FormState<LocationFormValues>}
+                  disableLocationProp={
+                    shouldLockDisableProps("locations").disabled
+                  }
+                  getValues={
+                    formMethods.getValues as unknown as UseFormGetValues<LocationFormValues>
+                  }
+                  setValue={
+                    formMethods.setValue as unknown as UseFormSetValue<LocationFormValues>
+                  }
+                  control={
+                    formMethods.control as unknown as Control<LocationFormValues>
+                  }
+                  formState={
+                    formMethods.formState as unknown as FormState<LocationFormValues>
+                  }
                   {...props}
                   customClassNames={customClassNames?.locationSection}
                 />
