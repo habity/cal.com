@@ -18,7 +18,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   });
   try {
     resetPasswordRequest &&
-      (await prisma.user.findUniqueOrThrow({ where: { email: resetPasswordRequest.email } }));
+      (await prisma.user.findUniqueOrThrow({
+        where: { email: resetPasswordRequest.email },
+      }));
   } catch (e) {
     resetPasswordRequest = null;
   }
@@ -27,6 +29,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     props: {
       isRequestExpired: !resetPasswordRequest,
       requestId: id,
+      email: resetPasswordRequest?.email ?? null,
     },
   };
 }
