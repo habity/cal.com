@@ -5,6 +5,7 @@ import { useEffect, useReducer, type CSSProperties } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useForm } from "react-hook-form";
 
+import { APP_NAME } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import type { inferSSRProps } from "@calcom/types/inferSSRProps";
 import { Button } from "@calcom/ui/components/button";
@@ -185,7 +186,7 @@ function PasswordResetForm({
           disabled={loading || isEmpty}
           className="w-full justify-center"
         >
-          {t("reset_password")}
+          {t("change_password")}
         </Button>
       </div>
     </Form>
@@ -212,7 +213,10 @@ export default function Page({
 
   if (isRequestExpired) {
     return (
-      <AuthContainer showLogo heading={t("reset_password")}>
+      <AuthContainer
+        showLogo
+        heading={t("reset_password", { appName: APP_NAME })}
+      >
         <Expired />
       </AuthContainer>
     );
@@ -221,7 +225,9 @@ export default function Page({
   return (
     <AuthContainer
       showLogo
-      heading={!success ? t("reset_password") : undefined}
+      heading={
+        !success ? t("reset_password", { appName: APP_NAME }) : undefined
+      }
     >
       {success ? (
         <Success />
