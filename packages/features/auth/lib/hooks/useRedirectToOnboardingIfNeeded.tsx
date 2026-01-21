@@ -36,17 +36,30 @@ export function useRedirectToOnboardingIfNeeded() {
   const flags = useFlagMap();
 
   const needsEmailVerification =
-    !user?.emailVerified && user?.identityProvider === "CAL" && flags["email-verification"];
+    !user?.emailVerified &&
+    user?.identityProvider === "CAL" &&
+    flags["email-verification"];
 
   const shouldRedirectToOnboarding = user && shouldShowOnboarding(user);
   // Don't redirect if already on an onboarding page (works for both old [[...step]] and v3 flows)
-  const isOnOnboardingPage = pathname?.startsWith("/onboarding/") || pathname?.startsWith("/getting-started");
+  const isOnOnboardingPage =
+    pathname?.startsWith("/onboarding/") ||
+    pathname?.startsWith("/getting-started");
+  // Don't redirect if on /apps/installed - the proxy middleware handles return-to cookie redirect
+  // This prevents the onboarding redirect from interfering with OAuth callback flows
+  const isOnAppsInstalledPage = pathname?.startsWith("/apps/installed");
   const canRedirect =
-    !isLoading && shouldRedirectToOnboarding && !needsEmailVerification && !isOnOnboardingPage;
+    !isLoading &&
+    shouldRedirectToOnboarding &&
+    !needsEmailVerification &&
+    !isOnOnboardingPage &&
+    !isOnAppsInstalledPage;
 
   useEffect(() => {
     if (canRedirect) {
-      const gettingStartedPath = flags["onboarding-v3"] ? "/onboarding/getting-started" : "/getting-started";
+      const gettingStartedPath = flags["onboarding-v3"]
+        ? "/onboarding/getting-started"
+        : "/getting-started";
       router.replace(gettingStartedPath);
     }
   }, [canRedirect, router, flags, pathname]);
