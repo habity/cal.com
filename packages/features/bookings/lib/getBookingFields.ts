@@ -170,6 +170,7 @@ export const ensureBookingInputsHaveSystemFields = ({
       // This Label is used in Email only as of now.
       defaultLabel: "your_name",
       required: true,
+      disableOnPrefill: true,
       sources: [
         {
           label: "Default",
@@ -184,6 +185,7 @@ export const ensureBookingInputsHaveSystemFields = ({
       name: "email",
       required: !isEmailFieldOptional,
       editable: "system-but-optional",
+      disableOnPrefill: true,
       sources: [
         {
           label: "Default",
@@ -199,6 +201,23 @@ export const ensureBookingInputsHaveSystemFields = ({
       required: false,
       hidden: true,
       editable: "system-but-optional",
+      disableOnPrefill: true,
+      sources: [
+        {
+          label: "Default",
+          id: "default",
+          type: "default",
+        },
+      ],
+    },
+    {
+      defaultLabel: "address",
+      type: "address",
+      name: "attendeeAddress",
+      required: false,
+      hidden: false,
+      editable: "system-but-optional",
+      disableOnPrefill: true,
       sources: [
         {
           label: "Default",
@@ -252,6 +271,7 @@ export const ensureBookingInputsHaveSystemFields = ({
       required: true,
       hidden: hideBookingTitle,
       defaultPlaceholder: "",
+      disableOnPrefill: true,
       sources: [
         {
           label: "Default",
@@ -267,6 +287,7 @@ export const ensureBookingInputsHaveSystemFields = ({
       editable: "system-but-optional",
       required: additionalNotesRequired,
       defaultPlaceholder: "share_additional_notes",
+      disableOnPrefill: true,
       sources: [
         {
           label: "Default",
@@ -283,6 +304,7 @@ export const ensureBookingInputsHaveSystemFields = ({
       defaultPlaceholder: "email",
       required: false,
       hidden: disableGuests,
+      disableOnPrefill: true,
       sources: [
         {
           label: "Default",
@@ -298,6 +320,7 @@ export const ensureBookingInputsHaveSystemFields = ({
       name: "rescheduleReason",
       defaultPlaceholder: "reschedule_placeholder",
       required: false,
+      disableOnPrefill: true,
       views: [
         {
           id: "reschedule",
