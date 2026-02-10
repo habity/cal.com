@@ -88,6 +88,7 @@ function AddressInput({
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [hasSelected, setHasSelected] = useState(!!value);
   const sessionTokenRef = useRef<TODO>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -157,6 +158,7 @@ function AddressInput({
   // Sync external value changes
   useEffect(() => {
     setInputValue(value || "");
+    setHasSelected(!!value);
   }, [value]);
 
   // Close dropdown on outside click
@@ -253,12 +255,14 @@ function AddressInput({
           new window.google.maps.places.AutocompleteSessionToken();
 
         setInputValue(formatted);
+        setHasSelected(true);
         onChange(formatted);
       } catch (error) {
         console.error("Error fetching place details:", error);
         // Fallback: use the prediction text
         const fallback = prediction.text.text;
         setInputValue(fallback);
+        setHasSelected(true);
         onChange(fallback);
       }
     },
@@ -268,7 +272,16 @@ function AddressInput({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setInputValue(val);
-    onChange(val);
+
+    // When Google is active, don't propagate typed text to the form —
+    // the form value only updates on selection. If cleared, reset form value.
+    if (isGoogleLoaded) {
+      if (val === "") {
+        onChange("");
+      }
+    } else {
+      onChange(val);
+    }
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -314,8 +327,29 @@ function AddressInput({
           if (predictions.length > 0) setShowDropdown(true);
         }}
         disabled={disabled}
-        className={cx("pl-10", rest?.className)}
+        readOnly={isGoogleLoaded && hasSelected}
+        className={cx(
+          "pl-10",
+          isGoogleLoaded && hasSelected ? "pr-8 cursor-default" : "",
+          rest?.className
+        )}
       />
+      {isGoogleLoaded && hasSelected && inputValue && (
+        <button
+          type="button"
+          className="text-muted hover:text-default absolute right-2 top-1/2 -translate-y-1/2"
+          onClick={() => {
+            setInputValue("");
+            setHasSelected(false);
+            onChange("");
+            setPredictions([]);
+            setShowDropdown(false);
+          }}
+          tabIndex={-1}
+        >
+          <Icon name="x" className="h-4 w-4" />
+        </button>
+      )}
       {showDropdown && predictions.length > 0 && (
         <ul
           className="border-subtle bg-default absolute top-full z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border shadow-lg"
