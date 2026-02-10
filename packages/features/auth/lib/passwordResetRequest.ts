@@ -3,7 +3,7 @@ import { getTranslation } from "@calcom/lib/server/i18n";
 import prisma from "@calcom/prisma";
 import type { User } from "@calcom/prisma/client";
 
-export const PASSWORD_RESET_EXPIRY_HOURS = 6;
+export const PASSWORD_RESET_EXPIRY_HOURS = 168; // 7 days
 
 const RECENT_MAX_ATTEMPTS = 3;
 const RECENT_PERIOD_IN_MINUTES = 5;
