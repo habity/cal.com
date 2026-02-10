@@ -211,22 +211,6 @@ export const ensureBookingInputsHaveSystemFields = ({
       ],
     },
     {
-      defaultLabel: "address",
-      type: "address",
-      name: "attendeeAddress",
-      required: false,
-      hidden: false,
-      editable: "system-but-optional",
-      disableOnPrefill: true,
-      sources: [
-        {
-          label: "Default",
-          id: "default",
-          type: "default",
-        },
-      ],
-    },
-    {
       defaultLabel: "location",
       type: "radioInput",
       name: "location",
