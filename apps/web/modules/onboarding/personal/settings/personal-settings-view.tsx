@@ -53,7 +53,9 @@ export const PersonalSettingsView = ({
       .string()
       .min(1, t("name_required"))
       .max(FULL_NAME_LENGTH_MAX_LIMIT, {
-        message: t("max_limit_allowed_hint", { limit: FULL_NAME_LENGTH_MAX_LIMIT }),
+        message: t("max_limit_allowed_hint", {
+          limit: FULL_NAME_LENGTH_MAX_LIMIT,
+        }),
       }),
     bio: z.string().optional(),
   });
@@ -126,7 +128,8 @@ export const PersonalSettingsView = ({
                 <Button
                   color="minimal"
                   className="rounded-[10px]"
-                  onClick={() => router.push("/onboarding/getting-started")}>
+                  onClick={() => router.push("/onboarding/getting-started")}
+                >
                   {t("back")}
                 </Button>
               )}
@@ -136,26 +139,37 @@ export const PersonalSettingsView = ({
                 color="primary"
                 className="rounded-[10px]"
                 loading={mutation.isPending}
-                disabled={mutation.isPending || !form.formState.isValid}>
+                disabled={mutation.isPending || !form.formState.isValid}
+              >
                 {t("continue")}
               </Button>
             </div>
-          }>
+          }
+        >
           <FormProvider {...form}>
             <form
               id="personal-settings-form"
               onSubmit={handleContinue}
-              className="flex w-full flex-col gap-6 px-1">
+              className="flex w-full flex-col gap-6 px-1"
+            >
               {/* Profile Picture */}
               <div className="flex w-full flex-col gap-2">
-                <Label className="text-emphasis text-sm font-medium leading-4">{t("profile_picture")}</Label>
+                <Label className="text-emphasis text-sm font-medium leading-4">
+                  {t("profile_picture")}
+                </Label>
                 <div className="flex flex-row items-center justify-start gap-2 rtl:justify-end">
                   {user && (
                     <div className="relative shrink-0">
                       <UserAvatar size="lg" user={user} previewSrc={imageSrc} />
                     </div>
                   )}
-                  <input ref={avatarRef} type="hidden" name="avatar" id="avatar" defaultValue={imageSrc} />
+                  <input
+                    ref={avatarRef}
+                    type="hidden"
+                    name="avatar"
+                    id="avatar"
+                    defaultValue={imageSrc}
+                  />
                   <ImageUploader
                     target="avatar"
                     id="avatar-upload"
@@ -164,11 +178,15 @@ export const PersonalSettingsView = ({
                       if (avatarRef.current) {
                         avatarRef.current.value = newAvatar;
                       }
-                      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-                        window.HTMLInputElement.prototype,
-                        "value"
-                      )?.set;
-                      nativeInputValueSetter?.call(avatarRef.current, newAvatar);
+                      const nativeInputValueSetter =
+                        Object.getOwnPropertyDescriptor(
+                          window.HTMLInputElement.prototype,
+                          "value"
+                        )?.set;
+                      nativeInputValueSetter?.call(
+                        avatarRef.current,
+                        newAvatar
+                      );
                       const ev2 = new Event("input", { bubbles: true });
                       avatarRef.current?.dispatchEvent(ev2);
                       updateProfileHandler(newAvatar);
@@ -176,21 +194,28 @@ export const PersonalSettingsView = ({
                     imageSrc={imageSrc}
                   />
                 </div>
-                <p className="text-subtle text-xs font-normal leading-3">{t("onboarding_logo_size_hint")}</p>
+                <p className="text-subtle text-xs font-normal leading-3">
+                  {t("onboarding_logo_size_hint")}
+                </p>
               </div>
 
               {/* Name */}
               <div className="flex w-full flex-col gap-1.5">
-                <TextField label={t("your_name")} {...form.register("name")} placeholder="John Doe" />
+                <TextField
+                  label={t("your_name")}
+                  {...form.register("name")}
+                  placeholder="John Doe"
+                />
                 {form.formState.errors.name && (
-                  <p className="text-error text-sm">{form.formState.errors.name.message}</p>
+                  <p className="text-error text-sm">
+                    {form.formState.errors.name.message}
+                  </p>
                 )}
               </div>
 
               {/* Username */}
               <div className="flex w-full flex-col gap-1.5">
                 <UsernameAvailabilityField
-                  disabled
                   onSuccessMutation={async () => {
                     // Refetch user to get updated username and save to store
                     const updatedUser = await utils.viewer.me.get.fetch();
@@ -203,10 +228,14 @@ export const PersonalSettingsView = ({
 
               {/* Bio */}
               <div className="flex w-full flex-col gap-1.5">
-                <Label className="text-emphasis mb-0 text-sm font-medium leading-4">{t("bio")}</Label>
+                <Label className="text-emphasis mb-0 text-sm font-medium leading-4">
+                  {t("bio")}
+                </Label>
                 <TextArea {...form.register("bio")} className="min-h-[108px]" />
                 {form.formState.errors.bio && (
-                  <p className="text-error text-sm">{form.formState.errors.bio.message}</p>
+                  <p className="text-error text-sm">
+                    {form.formState.errors.bio.message}
+                  </p>
                 )}
               </div>
             </form>
@@ -216,7 +245,9 @@ export const PersonalSettingsView = ({
         {/* Right column - Browser view */}
         <OnboardingBrowserView
           avatar={imageSrc || personalDetails.avatar || user.avatar}
-          name={form.watch("name") || personalDetails.name || user.name || undefined}
+          name={
+            form.watch("name") || personalDetails.name || user.name || undefined
+          }
           bio={form.watch("bio") || personalDetails.bio || undefined}
           username={personalDetails.username || user.username || undefined}
         />
