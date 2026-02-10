@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -10,7 +9,6 @@ import { useTimePreferences } from "@calcom/features/bookings/lib";
 import { TimezoneSelect } from "@calcom/features/components/timezone-select";
 import { FULL_NAME_LENGTH_MAX_LIMIT } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
-import { UserPermissionRole } from "@calcom/prisma/enums";
 import { trpc } from "@calcom/trpc/react";
 import type { RouterOutputs } from "@calcom/trpc/react";
 import { Button } from "@calcom/ui/components/button";
@@ -27,8 +25,6 @@ interface IUserSettingsProps {
 const UserSettings = (props: IUserSettingsProps) => {
   const { nextStep, user } = props;
   const { t } = useLocale();
-  const session = useSession();
-  const isAdmin = session.data?.user.role === UserPermissionRole.ADMIN;
   const { setTimezone: setSelectedTimeZone, timezone: selectedTimeZone } =
     useTimePreferences();
   const userSettingsSchema = z.object({
@@ -76,10 +72,8 @@ const UserSettings = (props: IUserSettingsProps) => {
   return (
     <form onSubmit={onSubmit}>
       <div className="stack-y-6">
-        {/* Username textfield: when not coming from signup, disabled for non-admins */}
-        {!props.hideUsername && (
-          <UsernameAvailabilityField disabled={!isAdmin} />
-        )}
+        {/* Username textfield */}
+        {!props.hideUsername && <UsernameAvailabilityField />}
 
         {/* Full name textfield */}
         <div className="w-full">
