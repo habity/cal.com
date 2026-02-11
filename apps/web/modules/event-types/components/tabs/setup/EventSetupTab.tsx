@@ -139,8 +139,8 @@ export const EventSetupTab = (
   const urlLockedProps = shouldLockDisableProps("slug");
   const titleLockedProps = shouldLockDisableProps("title");
 
-  // Non-admins cannot edit title, description, or URL
-  const isFieldsLockedForNonAdmin = !isAdmin;
+  // Allow all users to edit title, description, and URL
+  const isFieldsLockedForNonAdmin = false;
 
   return (
     <div>
@@ -222,7 +222,7 @@ export const EventSetupTab = (
             {...(isManagedEventType || isChildrenManagedEventType
               ? urlLockedProps
               : {})}
-            disabled={isFieldsLockedForNonAdmin}
+            disabled={!isAdmin}
             defaultValue={eventType.slug}
             data-testid="event-slug"
             containerClassName={classNames(
