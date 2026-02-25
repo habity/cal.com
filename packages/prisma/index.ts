@@ -20,10 +20,6 @@ const pool =
 const adapter = pool ? new PrismaPg(pool) : new PrismaPg({ connectionString });
 const prismaOptions: Prisma.PrismaClientOptions = {
   adapter,
-  transactionOptions: {
-    maxWait: 15000, // 15s max wait to acquire a connection for a transaction
-    timeout: 30000, // 30s max transaction duration
-  },
 };
 
 const globalForPrisma = global as unknown as {
